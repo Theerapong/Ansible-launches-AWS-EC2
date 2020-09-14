@@ -5,3 +5,7 @@ This is a testing and example,  "Access Key ID" and "Secret Access Key" want to 
 
 # How to run .
 ansible-playbook run01.yml --ask-vault-pass
+
+
+## Reference
+Course "Managing AWS with Ansible" from "A CLOUD GURU"
