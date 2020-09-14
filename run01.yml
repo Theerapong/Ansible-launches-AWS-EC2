@@ -1,0 +1,71 @@
+- hosts: localhost
+  gather_facts: no
+  vars_files:
+    - variables/vars.yml
+    - variables/encrypt-iam-account.yml
+  tasks:
+    - name: provision CentOS VM (EC2)
+      ec2:
+        aws_access_key: "{{ec2_access_key}}"
+        aws_secret_key: "{{ec2_secret_key}}" 
+        ec2_region: "{{ AWS_REGION }}"
+        instance_type: t2.micro
+        keypair: "keypair-for-ansible"
+        image: "ami-0157b1e4eefd91fd7" # centOS v8
+        #image: "ami-0a248ce88bcc7bd23" # centOS v7  (7.8.2003)
+        assign_public_ip: yes
+        vpc_subnet_id: "subnet-09678117a9fb4f6f1"
+        group_id: "sg-14e5924e"
+        wait: true
+        exact_count: 1
+        count_tag: 
+          Name: DemoA
+        instance_tags:
+          Name: "CentOS VM"
+      register: ec2
+    - debug:
+        var: ec2
+
+    - name: add hosts to inventory
+      add_host:
+        hostname: '{{ item.public_ip }}'
+        groupname: demogroup  # after this section is run, then we have the IPs in "demogroup"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no" # we attach a variable to "demogroup", We don't want to confirm the key validation
+        ansible_ssh_private_key_file: keypair-for-ansible.pem
+      loop: '{{ ec2.instances }}'
+      
+- hosts: demogroup
+  gather_facts: no  # if this is "yes" , then a SSH will no be waiting for long.
+  remote_user: centos
+  tasks:
+    - name: wait for SSH
+      wait_for_connection:
+        delay: 5
+        timeout: 200
+    #- name: check host status by Ping
+    #  ping:
+
+    - name: check version ****** 1st ****** 
+      command: hostnamectl
+      register: myversion1
+    - debug:
+        var: myversion1
+    
+    - name: upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+      become: true
+
+    - name: check version ****** 2nd ****** 
+      command: hostnamectl
+      register: myversion2
+    - debug:
+        var: myversion2 
+
+    - name: check if Docker is installed
+      command: systemctl status docker
+      register: docker_check
+      ignore_errors: yes
+    - debug:
+        var: docker_check
