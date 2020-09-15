@@ -42,30 +42,44 @@
       wait_for_connection:
         delay: 5
         timeout: 200
-    #- name: check host status by Ping
+    # - name: check host status by Ping
     #  ping:
 
-    - name: check version ****** 1st ****** 
-      command: hostnamectl
-      register: myversion1
-    - debug:
-        var: myversion1
+    # - name: check version ****** 1st ****** 
+    #   command: hostnamectl
+    #   register: myversion1
+    # - debug:
+    #     var: myversion1
     
-    - name: upgrade all packages
-      yum:
-        name: '*'
-        state: latest
+    # - name: upgrade all packages
+    #   yum:
+    #     name: '*'
+    #     state: latest
+    #   become: true
+
+    # - name: check version ****** 2nd ****** 
+    #   command: hostnamectl
+    #   register: myversion2
+    # - debug:
+    #     var: myversion2 
+
+    - name: add Docker repo
+      command: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
       become: true
-
-    - name: check version ****** 2nd ****** 
-      command: hostnamectl
-      register: myversion2
+      register: mycmd
     - debug:
-        var: myversion2 
+        var: mycmd
 
-    - name: check if Docker is installed
-      command: systemctl status docker
-      register: docker_check
-      ignore_errors: yes
+    - name: verify repo
+      command: dnf repolist -v
+      become: true
+      register: mycmd
     - debug:
-        var: docker_check
+        var: mycmd 
+
+    # - name: check if Docker is installed
+    #   command: systemctl status docker
+    #   register: docker_check
+    #   ignore_errors: yes
+    # - debug:
+    #     var: docker_check
