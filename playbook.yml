@@ -40,7 +40,7 @@
   tasks:
     - name: wait for SSH
       wait_for_connection:
-        delay: 5
+        delay: 2
         timeout: 200
     # - name: check host status by Ping
     #  ping:
@@ -63,53 +63,94 @@
     # - debug:
     #     var: myversion2 
 
-    - name: enable Docker CE repository *****
-      command: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd
+#stat here
 
-    - name: verify repo *****
-      command: dnf repolist -v
+    # - name: enable Docker CE repository *****
+    #   command: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd
+
+    # - name: verify repo *****
+    #   command: dnf repolist -v
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd 
+
+    # - name: see list *****
+    #   command: dnf list docker-ce
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd 
+
+    # - name: install Docker CE *****
+    #   command: dnf install docker-ce --nobest -y
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd
+
+    # - name: enable and start Docker CE *****
+    #   command: systemctl start docker
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd
+
+    # - name: enable and start Docker CE *****
+    #   command: systemctl enable docker
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd
+
+    # - name: check if Docker is installed
+    #   command: systemctl status docker
+    #   register: docker_check
+    #   ignore_errors: yes
+    #   become: true
+    # - debug:
+    #     var: docker_check
+
+
+    - name: install python3 *****
+      command: dnf install python3 -y
       become: true
       register: mycmd
     - debug:
         var: mycmd 
 
-    - name: see list *****
-      command: dnf list docker-ce
-      become: true
+    - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
+      pip:
+        name: pexpect
+      become: yes
+      
+    - name: generate the key, RSA AES256 *******
+      expect:
+        command: openssl genrsa -aes256 -out ca-key.pem 4096
+        responses:
+          "Enter pass phrase for ca-key.pem": "12345"
+          "Verifying - Enter pass phrase for ca-key.pem": "ansible"
+      # you don't want to show passwords in your logs
+      no_log: false
+
+    - name: generate the key, x509 *******
+      expect:
+        command: openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem
+        responses:
+          'Enter pass phrase for ca-key.pem': "ansible"
+          'Country Name \(2 letter code\) \[XX\]': "th"
+          'State or Province Name \(full name\) \[\]': "Bangkok"
+          'Locality Name \(eg, city\) \[Default City\]': "Sukhumwit"
+          'Organization Name \(eg, company\) \[Default Company Ltd\]': "Kixxxxch"
+          'Organizational Unit Name \(eg, section) \[\]': "DevOpsTeam"
+          'Common Name\*': "{{ hostvars }}"
+          'Email Address*': "jam@kixxxxch.com"
+      # you don't want to show passwords in your logs
+      #no_log: false
       register: mycmd
     - debug:
         var: mycmd 
-
-    - name: install Docker CE *****
-      command: dnf install docker-ce --nobest -y
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd
-
-    - name: enable and start Docker CE *****
-      command: systemctl start docker
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd
-
-    - name: enable and start Docker CE *****
-      command: systemctl enable docker
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd
-
-   
-    - name: check if Docker is installed
-      command: systemctl status docker
-      register: docker_check
-      ignore_errors: yes
-      become: true
-    - debug:
-        var: docker_check
