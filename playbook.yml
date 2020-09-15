@@ -38,6 +38,8 @@
   gather_facts: no  # if this is "yes" , then a SSH will no be waiting for long.
   remote_user: centos
   tasks:
+    - debug: var=demogroup
+
     - name: wait for SSH
       wait_for_connection:
         delay: 2
@@ -132,25 +134,30 @@
       expect:
         command: openssl genrsa -aes256 -out ca-key.pem 4096
         responses:
-          "Enter pass phrase for ca-key.pem": "12345"
-          "Verifying - Enter pass phrase for ca-key.pem": "ansible"
+          'Enter': "12345"
+          'Verifying': "12345"
+          # "Enter pass phrase for ca-key.pem": "12345"
+          # "Verifying - Enter pass phrase for ca-key.pem": "ansible"
       # you don't want to show passwords in your logs
       no_log: false
+      register: mycmd
+    - debug:
+        var: mycmd 
 
     - name: generate the key, x509 *******
       expect:
         command: openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem
         responses:
-          'Enter pass phrase for ca-key.pem': "ansible"
-          'Country Name \(2 letter code\) \[XX\]': "th"
-          'State or Province Name \(full name\) \[\]': "Bangkok"
-          'Locality Name \(eg, city\) \[Default City\]': "Sukhumwit"
-          'Organization Name \(eg, company\) \[Default Company Ltd\]': "Kixxxxch"
-          'Organizational Unit Name \(eg, section) \[\]': "DevOpsTeam"
-          'Common Name\*': "{{ hostvars }}"
-          'Email Address*': "jam@kixxxxch.com"
+          'Enter pass phrase for ca-key.pem': "12345"
+          'Country Name': "th"
+          'State or Province Name': "Bangkok"
+          'Locality Name': "Sukhumwit"
+          'Organization Name': "Kixxxxch"
+          'Organizational Unit Name': "DevOpsTeam"
+          'Common Name': "{{ hostvars[groups['demogroup'][0]]['item.public_ip'] }}"
+          'Email Address': "sample@kixxxxch.com"
       # you don't want to show passwords in your logs
-      #no_log: false
+      no_log: false
       register: mycmd
     - debug:
         var: mycmd 

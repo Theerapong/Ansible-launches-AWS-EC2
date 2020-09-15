@@ -1,2 +1,2 @@
 localhost
-#ec2 ansible_host=ec2-54-190-122-188.us-west-2.compute.amazonaws.com
+ec2 ansible_host=ec2-34-223-254-169.us-west-2.compute.amazonaws.com
