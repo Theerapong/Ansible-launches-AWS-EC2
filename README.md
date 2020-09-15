@@ -5,7 +5,9 @@ This is a testing and example,  "Access Key ID" and "Secret Access Key" want to 
 ### *step of this YAM file*
 (1) Connect to AWS using IAM account.
 
-(2)
+(2) 
+
+(Reference : https://www.linuxtechi.com/install-docker-ce-centos-8-rhel-8/ )
 
 ## How to run .
 ansible-playbook run01.yml --ask-vault-pass

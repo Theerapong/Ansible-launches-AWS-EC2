@@ -17,7 +17,7 @@
         vpc_subnet_id: "subnet-09678117a9fb4f6f1"
         group_id: "sg-14e5924e"
         wait: true
-        exact_count: 1
+        exact_count: 2
         count_tag: 
           Name: DemoA
         instance_tags:
@@ -63,23 +63,53 @@
     # - debug:
     #     var: myversion2 
 
-    - name: add Docker repo
+    - name: enable Docker CE repository *****
       command: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
       become: true
       register: mycmd
     - debug:
         var: mycmd
 
-    - name: verify repo
+    - name: verify repo *****
       command: dnf repolist -v
       become: true
       register: mycmd
     - debug:
         var: mycmd 
 
-    # - name: check if Docker is installed
-    #   command: systemctl status docker
-    #   register: docker_check
-    #   ignore_errors: yes
-    # - debug:
-    #     var: docker_check
+    - name: see list *****
+      command: dnf list docker-ce
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd 
+
+    - name: install Docker CE *****
+      command: dnf install docker-ce --nobest -y
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd
+
+    - name: enable and start Docker CE *****
+      command: systemctl start docker
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd
+
+    - name: enable and start Docker CE *****
+      command: systemctl enable docker
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd
+
+   
+    - name: check if Docker is installed
+      command: systemctl status docker
+      register: docker_check
+      ignore_errors: yes
+      become: true
+    - debug:
+        var: docker_check
