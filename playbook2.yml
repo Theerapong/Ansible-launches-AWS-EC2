@@ -17,7 +17,7 @@
         vpc_subnet_id: "subnet-09678117a9fb4f6f1"
         group_id: "sg-14e5924e"
         wait: true
-        exact_count: 2
+        exact_count: 1
         count_tag: 
           Name: DemoA
         instance_tags:
