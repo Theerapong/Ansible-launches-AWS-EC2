@@ -17,7 +17,7 @@
         vpc_subnet_id: "subnet-09678117a9fb4f6f1"
         group_id: "sg-14e5924e"
         wait: true
-        exact_count: 1
+        exact_count: 2
         count_tag: 
           Name: DemoA
         instance_tags:
@@ -41,39 +41,22 @@
 - hosts: demogroup
   gather_facts: no  # if this is "yes" , then a SSH will no be waiting for long.
   remote_user: centos
-  #vars:
-  #  myDNS: "{{ item.0 }}"
   tasks:
-    - name: wait for SSH 1111111111
+    - name: wait for SSH 
       wait_for_connection:
         delay: 2
         timeout: 200
-    - name: Collect instance facts
-      ec2_metadata_facts:
-      register: ec2_metadata_facts
 
+    - ec2_metadata_facts:   # keyword =>> ansible, ec2 facts from metadata
 
-- hosts: localhost
-  gather_facts: yes
-  remote_user: centos
-  vars_files:
-    - variables/vars.yml
-    - variables/encrypt-iam-account.yml
-  tasks:
-    # - name: wait for SSH
-    #   wait_for_connection:
-    #     delay: 2
-    #     timeout: 200
-    - name: Reset
-      meta: reset_connection
+    - name: debug *** ansible_ec2_public_ipv4 ***
+      debug: var=ansible_ec2_public_ipv4
 
-    - name: wait for SSH 2222222
-      wait_for_connection:
-        delay: 2
-        timeout: 200
-    - name: Check out gatherd facts
-      debug:
-        var: hostvars[groups['demogroup'][0]['ansible_ec2_public_hostname']]
+    - name: debug *** ansible_ec2_network_interfaces_macs__public_hostname ***
+      debug: var=ansible_ec2_network_interfaces_macs__public_hostname
+
+    - name: debug *** ansible_ec2_public_hostname ***
+      debug: var=ansible_ec2_public_hostname
 
     # - name: check host status by Ping
     #  ping:
@@ -183,7 +166,7 @@
           'Locality Name': "Sukhumwit"
           'Organization Name': "Kixxxx"
           'Organizational Unit Name': "DevTeam"
-          'Common Name': "{{ hostvars[groups['demogroup'][0]['ansible_ec2_public_hostname']] }}"
+          'Common Name': "{{ ansible_ec2_public_hostname }}"
           'Email Address': "sample@kixxxx.com"
       no_log: false
       register: mycmd

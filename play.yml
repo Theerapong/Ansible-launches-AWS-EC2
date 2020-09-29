@@ -1,0 +1,13 @@
+--- # play example
+- hosts: localhost              # target
+  become: yes                   # escalate the privilage
+  tasks:
+    - name: install software
+      yum:                      # yum module
+        name: elinks            # argument name
+        state: latest           # argument state
+
+    - name: install more software
+      yum:
+        name: nmap-ncat
+        state: latest
