@@ -49,12 +49,6 @@
 
     - ec2_metadata_facts:   # keyword =>> ansible, ec2 facts from metadata
 
-    - name: debug *** ansible_ec2_public_ipv4 ***
-      debug: var=ansible_ec2_public_ipv4
-
-    - name: debug *** ansible_ec2_network_interfaces_macs__public_hostname ***
-      debug: var=ansible_ec2_network_interfaces_macs__public_hostname
-
     - name: debug *** ansible_ec2_public_hostname ***
       debug: var=ansible_ec2_public_hostname
 
