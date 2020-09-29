@@ -2,7 +2,7 @@
 
 This is a testing and example,  "Access Key ID" and "Secret Access Key" want to show in the encrypted file . Although, in fact, the keys must not be here in public . So, the keys are changed in IAM user of AWS.
 
-### *step of this YAM file*
+### *steps of this YAML file*
 (1) Connect to AWS using IAM account.
 
 (2) 
