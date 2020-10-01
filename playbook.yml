@@ -11,19 +11,17 @@
         ec2_region: "{{ AWS_REGION }}"
         instance_type: "{{ INSTANCE_TYPE }}"
         keypair: "{{ KEYPAIR }}"
-        #image: "ami-0157b1e4eefd91fd7" # centOS v8
-        #image: "ami-0115e4834c4a3d983" # centOS v8.2 from AWS Marketplace (subscribe version from  FrontLine)
-        #image: "ami-0014cffc507ad6c79" # centOS v7  from community (brightheadnode-8.2-centos7u5-hvm-15) 
-        #image: "ami-0a248ce88bcc7bd23" # centOS v7  (7.8.2003)
-        image: "ami-060396dd859d237db" # centOS v8 minimal  from 
-        # image: "ami-0bc06212a56393ee1" # CentOS 7 (x86_64) - with Updates HVM
+        image: "{{ IMAGE }}"
         assign_public_ip: yes
         vpc_subnet_id: "{{ VPC_SUBNET_ID }}"
         group_id: "{{ GROUP_ID }}"
         wait: true
         exact_count: "{{ EXACT_COUNT }}"
-        volume_size: 60
-        device_name: /dev/xvdf
+        # volumes:
+        #   - device_name: /dev/sda1
+        #     volume_type: gp2
+        #     volume_size: 60
+        #     delete_on_termination: true
         count_tag: 
           Name: DemoA
         instance_tags:
