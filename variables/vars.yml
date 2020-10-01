@@ -1,3 +1,4 @@
+# Variable of EC2 VM
 AWS_REGION: "us-west-2"
 INSTANCE_TYPE: "t2.micro"
 KEYPAIR: "keypair-for-ansible"
@@ -5,6 +6,12 @@ VPC_SUBNET_ID: "subnet-09678117a9fb4f6f1"
 GROUP_ID: "sg-14e5924e"
 EXACT_COUNT: 1
 IMAGE: "ami-060396dd859d237db" # CentOS 8 Minimal from the AWS Marketplace (By ProComputers.com)
+INSTANCE_TAGS: "CentOS VM"
+
+# Variables of volume 
+VOLUME_SIZE: "40"
+VOLUME_TYPE: "gp2"
+DEVICE_NAME: "/dev/sdb"
 
 #image: "ami-0157b1e4eefd91fd7" # centOS v8
         #image: "ami-0115e4834c4a3d983" # centOS v8.2 from AWS Marketplace (subscribe version from  FrontLine)
