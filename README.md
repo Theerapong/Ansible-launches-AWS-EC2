@@ -12,15 +12,25 @@ This is a test,  "Access Key ID" and "Secret Access Key" want to show in the enc
 ## How to run .
 ansible-playbook playbook.yml --ask-vault-pass
 
+
 ## Prerequisite for this Playbook
+
 pip3 install ansible
+
 pip3 install boto
+
 pip3 install boto3
+
 pip3 install botocore
+
 pip3 install awscli
+
 pip3 install pyOpenSSL
+
 pip3 install pexpect
+
 pip3 install dnspython
+
 
 ## Reference
 (1) Course "Managing AWS with Ansible" from "A CLOUD GURU" .
