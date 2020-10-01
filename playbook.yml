@@ -36,9 +36,6 @@
         groupname: demogroup  # after this section is run, then we have the IPs in "demogroup"
         ansible_ssh_common_args: "-o StrictHostKeyChecking=no" # we attach a variable to "demogroup", We don't want to confirm the key validation
         ansible_ssh_private_key_file: keypair-for-ansible.pem
-        # * test code
-        #lineinfile: dest=temphosts regexp='.*{{ item }}$' line="{{ hostvars[item].item.public_dns_name }} {{item}}" state=present
-        #when: hostvars[item].item.public_dns_name is defined
       loop: '{{ ec2.instances }}'
     
       
@@ -51,7 +48,7 @@
         delay: 2
         timeout: 200
 
-    - ec2_metadata_facts:   # keyword =>> ansible, ec2 facts from metadata
+    - ec2_metadata_facts:   # ansible fetches ec2 facts from metadata
 
     - name: debug *** ansible_ec2_local_ipv4 ***
       debug: var=ansible_ec2_local_ipv4
@@ -61,9 +58,6 @@
 
     - name: debug *** ansible_ec2_public_hostname ***
       debug: var=ansible_ec2_public_hostname
-
-    # - name: check host status by Ping
-    #  ping:
 
     # - name: check version ****** 1st ****** 
     #   command: hostnamectl
@@ -104,14 +98,6 @@
     #   register: var
     # - debug:
     #     var: var 
-
-    # - name: check version ****** 2nd ****** 
-    #   command: hostnamectl
-    #   register: myversion2
-    # - debug:
-    #     var: myversion2 
-
-#stat here
 
     # - name: enable Docker CE repository *****
     #   command: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo

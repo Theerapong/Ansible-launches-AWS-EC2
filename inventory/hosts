@@ -1,2 +1,0 @@
-localhost
-ec2 ansible_host=ec2-34-223-254-169.us-west-2.compute.amazonaws.com
