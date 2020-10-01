@@ -14,6 +14,7 @@ ansible-playbook playbook.yml --ask-vault-pass
 
 
 ## Prerequisite for this Playbook
+At the local machine
 
 pip3 install ansible
 
