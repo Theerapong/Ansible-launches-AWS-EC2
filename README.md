@@ -5,7 +5,7 @@ This is a testing and example,  "Access Key ID" and "Secret Access Key" want to 
 ## How to prepare variables
 
 ## How to run .
-ansible-playbook run01.yml --ask-vault-pass
+ansible-playbook playbook.yml --ask-vault-pass
 
 ### *steps of this YAML file*
 (1) Connect to AWS using IAM account.
