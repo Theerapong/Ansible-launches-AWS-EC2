@@ -1,6 +1,6 @@
 ## Overall
 
-This is a testing and example,  "Access Key ID" and "Secret Access Key" want to show in the encrypted file . Although, in fact, the keys must not be here in public . So, the keys are changed in IAM user of AWS.
+This is a test,  "Access Key ID" and "Secret Access Key" want to show in the encrypted file . Although, the keys must not be here in public.
 
 ## How to prepare variables
 
