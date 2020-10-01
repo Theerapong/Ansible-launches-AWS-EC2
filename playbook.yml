@@ -100,22 +100,31 @@
       command: "{{ item }}"
       with_items:
         - yum update -y
-        - dnf install python3 -y
+        - yum install python2 -y
+        - yum install python3 -y
+        - yum install epel-release -y
+        - yum install python-pip -y
+        - pip2 install pexpect
         - pip3 install pexpect
-        - dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
-        - dnf repolist -v # verify repository
-        - dnf install docker-ce --nobest -y
-        # - dnf install docker-ce docker-ce-cli containerd.io -y  # install Docker 
-        - dnf install curl -y  # This will install Docker Compose
-        - curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        - chmod +x /usr/local/bin/docker-compose
+        # - yum install dnf -y
+        # - dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
+        - yum install -y yum-utils
+        - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+        # - yum install docker-ce docker-ce-cli containerd.io -y #this is version 19.03.13
+        - yum install docker-ce-18.09.9 docker-ce-cli-18.09.9 containerd.io -y
+  #       - dnf repolist -v # verify repository
+  #       - dnf install docker-ce --nobest -y
+  #       # - dnf install docker-ce docker-ce-cli containerd.io -y  # install Docker 
+  #       - dnf install curl -y  # This will install Docker Compose
+  #       - curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  #       - chmod +x /usr/local/bin/docker-compose
       become: true
 
 
     - name: Start Docker's services *****
       command: "{{ item }}"
       with_items:
-        - systemctl daemon-reload
+  #       - systemctl daemon-reload
         - systemctl start docker
         - systemctl enable docker
       become: true
@@ -130,19 +139,19 @@
         var: docker_check
 
     
-    # - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
-    #   pip:
-    #     name: pexpect
-    #   become: yes
+    - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
+      pip:
+        name: pexpect
+      become: yes
 
 
-  ####################################################################
-  #                                                                  #
-  #    Protect the Docker daemon to be secure                        #
-  #                                                                  #
-  #    According to https://docs.docker.com/engine/security/https/   #
-  #                                                                  # 
-  ####################################################################
+  # ####################################################################
+  # #                                                                  #
+  # #    Protect the Docker daemon to be secure                        #
+  # #                                                                  #
+  # #    According to https://docs.docker.com/engine/security/https/   #
+  # #                                                                  # 
+  # ####################################################################
 
     - name: Generate the Private Key *******
       expect:
@@ -223,12 +232,12 @@
       become: true
   
 
-    # - name: Make the Docker daemon only accept connections from clients providing a certificate trusted by your CA *****
-    #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
-    #   become: true
-    #   register: mycmd
-    # - debug:
-    #     var: mycmd 
+    - name: Make the Docker daemon only accept connections from clients providing a certificate trusted by your CA *****
+      command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd 
 
 
     # - name: i ***** 
