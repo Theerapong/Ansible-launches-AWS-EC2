@@ -8,6 +8,7 @@ ansible -i inventory ec2 -m ping -u centos
 ansible-playbook -i inventory my_playbook.yml
 ansible-playbook run01.yml -i inventory --ask-vault-pass
 ansible-playbook playbook.yml --ask-vault-pass
+ansible-playbook playbook2.yml --ask-vault-pass
 
 
 https://allandenot.com/devops/2015/01/16/ansible-with-multiple-inventory-files.html

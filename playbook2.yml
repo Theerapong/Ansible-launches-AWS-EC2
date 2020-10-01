@@ -11,8 +11,12 @@
         ec2_region: "{{ AWS_REGION }}"
         instance_type: t2.micro
         keypair: "keypair-for-ansible"
-        image: "ami-0157b1e4eefd91fd7" # centOS v8
+        #image: "ami-0157b1e4eefd91fd7" # centOS v8
+        #image: "ami-0115e4834c4a3d983" # centOS v8.2 from AWS Marketplace (subscribe version from  FrontLine)
+        #image: "ami-0014cffc507ad6c79" # centOS v7  from community (brightheadnode-8.2-centos7u5-hvm-15) 
         #image: "ami-0a248ce88bcc7bd23" # centOS v7  (7.8.2003)
+        image: "ami-060396dd859d237db" # centOS v8 minimal  from 
+        # image: "ami-0bc06212a56393ee1" # CentOS 7 (x86_64) - with Updates HVM
         assign_public_ip: yes
         vpc_subnet_id: "subnet-09678117a9fb4f6f1"
         group_id: "sg-14e5924e"
@@ -49,6 +53,12 @@
 
     - ec2_metadata_facts:   # keyword =>> ansible, ec2 facts from metadata
 
+    - name: debug *** ansible_ec2_local_ipv4 ***
+      debug: var=ansible_ec2_local_ipv4
+
+    - name: debug *** ansible_ec2_public_ipv4 ***
+      debug: var=ansible_ec2_public_ipv4
+
     - name: debug *** ansible_ec2_public_hostname ***
       debug: var=ansible_ec2_public_hostname
 
@@ -61,11 +71,39 @@
     # - debug:
     #     var: myversion1
     
-    # - name: upgrade all packages
+    # - name: upgrade all packages (1)
     #   yum:
     #     name: '*'
     #     state: latest
     #   become: true
+# ...
+
+    - name: install *****
+      command: "{{ item }}"
+      with_items:
+        - yum update -y
+        - dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+        - dnf repolist -v # verify repo
+        - dnf list docker-ce # see list
+        # - dnf install docker-ce docker-ce-cli containerd.io -y
+        - dnf install docker-ce --nobest -y
+        - systemctl start docker
+        - systemctl enable docker
+        - dnf install curl -y  # then, install docker compose
+        - curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        - chmod +x /usr/local/bin/docker-compose
+        - dnf install python3 -y
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd
+
+
+    # - name: update *****
+    #   command: sudo yum update -y
+    #   register: var
+    # - debug:
+    #     var: var 
 
     # - name: check version ****** 2nd ****** 
     #   command: hostnamectl
@@ -76,7 +114,7 @@
 #stat here
 
     # - name: enable Docker CE repository *****
-    #   command: dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+    #   command: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
     #   become: true
     #   register: mycmd
     # - debug:
@@ -97,7 +135,8 @@
     #     var: mycmd 
 
     # - name: install Docker CE *****
-    #   command: dnf install docker-ce --nobest -y
+    #   # command: dnf install docker-ce --nobest -y
+    #   command: dnf install docker-ce docker-ce-cli containerd.io -y
     #   become: true
     #   register: mycmd
     # - debug:
@@ -126,12 +165,12 @@
     #     var: docker_check
 
 
-    - name: install python3 *****
-      command: dnf install python3 -y
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd 
+    # - name: install python3 *****
+    #   command: dnf install python3 -y
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd 
 
     - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
       pip:
@@ -167,5 +206,105 @@
     - debug:
         var: mycmd
 
+    - name: gen RSA (1) *****
+      command: openssl genrsa -out server-key.pem 4096
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd 
 
+    - name: gen RSA (2) *****
+      command: openssl req -subj "/CN={{ ansible_ec2_public_hostname }}" -sha256 -new -key server-key.pem -out server.csr
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd 
+
+    - name: write extfile.cnf  (1) ***
+      shell: echo "subjectAltName = DNS:{{ ansible_ec2_public_hostname }},IP:{{ ansible_ec2_public_ipv4 }},IP:{{ ansible_ec2_local_ipv4 }}" > extfile.cnf
+      #become: true
+      args:
+        creates: "extfile.cnf"
+      register: mycmd
+    - debug:
+        var: mycmd 
+
+    - name: write extfile.cnf  (2) ***
+      shell: echo "extendedKeyUsage = serverAuth" > extfile.cnf
+      #become: true
+      register: mycmd
+    - debug:
+        var: mycmd 
+
+
+    - name: generate the signed certificate *******
+      expect:
+        command: openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -extfile extfile.cnf
+        responses:
+          'Enter': "12345"
+      # you don't want to show passwords in your logs
+      no_log: false
+      register: mycmd
+    - debug:
+        var: mycmd
+
+    - name: gen RSA  *****
+      command: openssl genrsa -out key.pem 4096
+      register: mycmd
+    - debug:
+        var: mycmd 
+    
+    - name: create client.csr *****
+      command: openssl req -subj '/CN=client' -new -key key.pem -out client.csr
+      register: mycmd
+    - debug:
+        var: mycmd 
+
+    - name: write extfile.cnf  (2) ***
+      shell: echo "extendedKeyUsage = clientAuth" > extfile-client.cnf
+      register: mycmd
+    - debug:
+        var: mycmd 
+# Now, generate the signed certificate:
+
+    - name: generate the signed certificate (10) *******
+      expect:
+        command: openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -extfile extfile-client.cnf
+        responses:
+          'Enter': "12345"
+      no_log: false
+      register: mycmd
+    - debug:
+        var: mycmd
+
+    # - name: remove *****
+    #   command: rm -v client.csr server.csr extfile.cnf extfile-client.cnf
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd 
+
+    - name: chmod *****
+      command: "{{ item }}"
+      with_items:
+        - rm -v client.csr server.csr extfile.cnf extfile-client.cnf
+        - chmod -v 0400 ca-key.pem key.pem server-key.pem
+        - chmod -v 0444 ca.pem server-cert.pem cert.pem
+        # - systemctl stop docker
+        # - rm -rf /var/lib/docker
+        # - systemctl start docker
+        - ps axf | grep docker | grep -v grep | awk '{print "kill -9 " $1}' | sudo sh
+        - rm /var/run/docker.pid
+        # - dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  # make the Docker daemon only accept connections from clients providing a certificate trusted by your CA:
+      become: true
+      register: mycmd
+    - debug:
+        var: mycmd
+
+    # - name: start demond *****
+    #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  # make the Docker daemon only accept connections from clients providing a certificate trusted by your CA:
+    #   become: true
+    #   register: mycmd
+    # - debug:
+    #     var: mycmd 
 
