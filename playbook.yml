@@ -104,8 +104,6 @@
         - pip3 install pexpect
         - dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
         - dnf repolist -v # verify repository
-        # - dnf list docker-ce # see list
-        - yum -y remove podman # the podman-manpages are in conflict with docker-ce, so we have to remove.
         - dnf install docker-ce --nobest -y
         # - dnf install docker-ce docker-ce-cli containerd.io -y  # install Docker 
         - dnf install curl -y  # This will install Docker Compose
@@ -226,7 +224,7 @@
   
 
     # - name: Make the Docker daemon only accept connections from clients providing a certificate trusted by your CA *****
-    #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  
+    #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
     #   become: true
     #   register: mycmd
     # - debug:
