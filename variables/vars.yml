@@ -1,2 +1,6 @@
 AWS_REGION: "us-west-2"
 INSTANCE_TYPE: "t2.micro"
+KEYPAIR: "keypair-for-ansible"
+VPC_SUBNET_ID: "subnet-09678117a9fb4f6f1"
+GROUP_ID: "sg-14e5924e"
+EXACT_COUNT: 1
