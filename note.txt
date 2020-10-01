@@ -11,6 +11,3 @@ ansible-playbook playbook.yml --ask-vault-pass
 ansible-playbook playbook2.yml --ask-vault-pass
 
 
-https://allandenot.com/devops/2015/01/16/ansible-with-multiple-inventory-files.html
-
-
