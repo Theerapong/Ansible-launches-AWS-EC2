@@ -18,7 +18,7 @@
         wait: true
         exact_count: "{{ EXACT_COUNT }}"    
         count_tag: 
-          Name: DemoA
+          Name: Demo
         instance_tags:
           Name: "{{ INSTANCE_TAGS }}"
       register: ec2
@@ -81,17 +81,21 @@
         - mkdir /newStorage
         - mount /dev/xvdb /newStorage/
       become: true
-      register: mycmd
+  
+
+    - name: check the size of volumes
+      command: df -h
+      register: check
     - debug:
-        var: mycmd
+        var: check
 
-
-    - name: install docker *****
+    - name: update CentOS, install docker and others *****
       command: "{{ item }}"
       with_items:
         - hostnamectl
         - yum update -y
         - dnf install python3 -y
+        - pip3 install pexpect
         - dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
         - dnf repolist -v # verify repository
         - dnf list docker-ce # see list
@@ -103,9 +107,6 @@
         - curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         - chmod +x /usr/local/bin/docker-compose
       become: true
-      register: mycmd
-    - debug:
-        var: mycmd
 
 
 
@@ -117,40 +118,31 @@
     - debug:
         var: docker_check
 
-    - name: check the volumes 
-      command: df -h
-      register: check
-    - debug:
-        var: check
-
-
-
-    - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
-      pip:
-        name: pexpect
-      become: yes
+    
+    # - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
+    #   pip:
+    #     name: pexpect
+    #   become: yes
 
 
   ####################################################################
   #                                                                  #
-  #    Protect the Docker daemon socket                              #
+  #    Protect the Docker daemon to be secure                        #
   #                                                                  #
   #    According to https://docs.docker.com/engine/security/https/   #
   #                                                                  # 
   ####################################################################
 
-    - name: generate the key, RSA AES256 *******
+    - name: Generate the Private Key *******
       expect:
         command: openssl genrsa -aes256 -out ca-key.pem 4096
         responses:
           'Enter': "12345"
           'Verifying': "12345"
       no_log: false # don't want to show passwords in logs
-      register: mycmd
-    - debug:
-        var: mycmd
+  
 
-    - name: generate the key, x509 *******
+    - name: Generate the Public Key *******
       expect:
         command: openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem
         responses:
@@ -163,103 +155,83 @@
           'Common Name': "{{ ansible_ec2_public_hostname }}"
           'Email Address': "sample@kixxxx.com"
       no_log: false
-      register: mycmd
-    - debug:
-        var: mycmd
 
-    - name: gen RSA (1) *****
-      command: openssl genrsa -out server-key.pem 4096
+    
+    - name: Create a server key and certificate signing request (CSR) *****
+      command: "{{ item }}"
+      with_items:
+        - openssl genrsa -out server-key.pem 4096
+        - openssl req -subj "/CN={{ ansible_ec2_public_hostname }}" -sha256 -new -key server-key.pem -out server.csr
       become: true
-      register: mycmd
-    - debug:
-        var: mycmd 
 
-    - name: gen RSA (2) *****
-      command: openssl req -subj "/CN={{ ansible_ec2_public_hostname }}" -sha256 -new -key server-key.pem -out server.csr
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd 
 
-    - name: write extfile.cnf  (1) ***
+    - name: Sign the public key with our CA  (1) *** #  to allow connections 
       shell: echo "subjectAltName = DNS:{{ ansible_ec2_public_hostname }},IP:{{ ansible_ec2_public_ipv4 }},IP:{{ ansible_ec2_local_ipv4 }}" > extfile.cnf
-      #become: true
       args:
         creates: "extfile.cnf"
-      register: mycmd
-    - debug:
-        var: mycmd 
-
-    - name: write extfile.cnf  (2) ***
+  
+    - name: Sign the public key with our CA  (2) *** # Set the Docker daemon key’s extended usage attributes to be used only for server authentication:
       shell: echo "extendedKeyUsage = serverAuth" > extfile.cnf
-      #become: true
-      register: mycmd
-    - debug:
-        var: mycmd 
+ 
 
 
-    - name: generate the signed certificate *******
+    - name: Generate the signed certificate *******
       expect:
         command: openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -extfile extfile.cnf
         responses:
           'Enter': "12345"
       no_log: false # don't want to show passwords in logs
-      register: mycmd
-    - debug:
-        var: mycmd
 
-    - name: gen RSA  *****
-      command: openssl genrsa -out key.pem 4096
-      register: mycmd
-    - debug:
-        var: mycmd 
-    
-    - name: create client.csr *****
-      command: openssl req -subj '/CN=client' -new -key key.pem -out client.csr
-      register: mycmd
-    - debug:
-        var: mycmd 
 
-    - name: write extfile.cnf  (2) ***
+    - name: Create a client key and certificate signing request (For client authentication) *****
+      command: "{{ item }}"
+      with_items:
+        - openssl genrsa -out key.pem 4096
+        - openssl req -subj '/CN=client' -new -key key.pem -out client.csr
+      become: true
+
+
+    - name: Create a new extensions config file (To make the key suitable for client authentication) ***
       shell: echo "extendedKeyUsage = clientAuth" > extfile-client.cnf
-      register: mycmd
-    - debug:
-        var: mycmd 
 
-# Now, generate the signed certificate:
 
-    - name: generate the signed certificate *******
+    - name: Generate the signed certificate *******
       expect:
         command: openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -extfile extfile-client.cnf
         responses:
           'Enter': "12345"
       no_log: false
-      register: mycmd
-    - debug:
-        var: mycmd
+    
 
-
-    - name: chmod *****
+    - name: Remove some file and change permission to others ***** #After generating cert.pem and server-cert.pem , we can safely remove the two certificate signing requests and extensions config files
       command: "{{ item }}"
       with_items:
         - rm -v client.csr server.csr extfile.cnf extfile-client.cnf
         - chmod -v 0400 ca-key.pem key.pem server-key.pem
         - chmod -v 0444 ca.pem server-cert.pem cert.pem
-        # - systemctl stop docker
-        # - rm -rf /var/lib/docker
-        # - systemctl start docker
-        - ps axf | grep docker | grep -v grep | awk '{print "kill -9 " $1}' | sudo sh
-        - rm /var/run/docker.pid
-        # - dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  # make the Docker daemon only accept connections from clients providing a certificate trusted by your CA:
       become: true
-      register: mycmd
-    - debug:
-        var: mycmd
+  
 
     # - name: start demond *****
-    #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  # make the Docker daemon only accept connections from clients providing a certificate trusted by your CA:
+    #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  
     #   become: true
     #   register: mycmd
     # - debug:
     #     var: mycmd 
+    - name: i ***** 
+      command: "{{ item }}"
+      with_items:
+        # - systemctl stop docker
+        # - rm -rf /var/lib/docker
+        # - systemctl start docker
+        # - ps axf | grep docker | grep -v grep | awk '{print "kill -9 " $1}' | sudo sh
+        # - rm /var/run/docker.pid
+        # - dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  
+      become: true
 
+
+    # - name: a *****
+    #   command: "{{ item }}"
+    #   with_items:
+    #     - 
+    #   become: true
