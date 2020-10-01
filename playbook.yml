@@ -83,34 +83,47 @@
       become: true
   
 
-    - name: check the size of volumes
+    - name: Check the size of volumes
       command: df -h
       register: check
     - debug:
         var: check
 
-    - name: update CentOS, install docker and others *****
+    - name: Check the OS
+      command: hostnamectl
+      register: check
+    - debug:
+        var: check
+      
+
+    - name: Update CentOS, install Docker and others *****
       command: "{{ item }}"
       with_items:
-        - hostnamectl
         - yum update -y
         - dnf install python3 -y
         - pip3 install pexpect
         - dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
         - dnf repolist -v # verify repository
-        - dnf list docker-ce # see list
-        - dnf install docker-ce docker-ce-cli containerd.io -y  # install Docker 
-        # - dnf install docker-ce --nobest -y
-        - systemctl start docker
-        - systemctl enable docker
+        # - dnf list docker-ce # see list
+        - yum -y remove podman # the podman-manpages are in conflict with docker-ce, so we have to remove.
+        - dnf install docker-ce --nobest -y
+        # - dnf install docker-ce docker-ce-cli containerd.io -y  # install Docker 
         - dnf install curl -y  # This will install Docker Compose
         - curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
         - chmod +x /usr/local/bin/docker-compose
       become: true
 
 
+    - name: Start Docker's services *****
+      command: "{{ item }}"
+      with_items:
+        - systemctl daemon-reload
+        - systemctl start docker
+        - systemctl enable docker
+      become: true
 
-    - name: check if Docker is installed
+
+    - name: check if Docker is being run
       command: systemctl status docker
       register: docker_check
       ignore_errors: yes
@@ -212,26 +225,21 @@
       become: true
   
 
-    # - name: start demond *****
+    # - name: Make the Docker daemon only accept connections from clients providing a certificate trusted by your CA *****
     #   command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  
     #   become: true
     #   register: mycmd
     # - debug:
     #     var: mycmd 
-    - name: i ***** 
-      command: "{{ item }}"
-      with_items:
+
+
+    # - name: i ***** 
+    #   command: "{{ item }}"
+    #   with_items:
         # - systemctl stop docker
         # - rm -rf /var/lib/docker
         # - systemctl start docker
         # - ps axf | grep docker | grep -v grep | awk '{print "kill -9 " $1}' | sudo sh
         # - rm /var/run/docker.pid
         # - dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  
-      become: true
-
-
-    # - name: a *****
-    #   command: "{{ item }}"
-    #   with_items:
-    #     - 
-    #   become: true
+      # become: true
