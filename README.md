@@ -1,5 +1,5 @@
 ## Overall
-This is a test,  "Access Key ID" and "Secret Access Key" want to show in the encrypted file . Although, the keys must not be here in public.
+This is a test. This playbook will launch CentOS on EC2 (1 instance or more than 1).  The goal is to install and configure Docker .
 
 
 ## Prepare variables
@@ -7,7 +7,7 @@ This is a test,  "Access Key ID" and "Secret Access Key" want to show in the enc
 
 (2) In face, there is file "keypair-for-ansible.pem" which is used for SSH, but not in GitHub.
 
-(3) The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for this IAM user, are encrypted in "/variables/encrypt-iam-account.yml".
+(3) The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for this IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to our keys .
 
 ## How to run .
 ansible-playbook playbook.yml --ask-vault-pass
