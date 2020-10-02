@@ -230,6 +230,7 @@
       become: true
   
 
+    # ***** still error here at "dockerd" !!! ***
     - name: Make the Docker daemon only accept connections from clients providing a certificate trusted by your CA *****
       command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
       become: true
