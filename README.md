@@ -9,8 +9,7 @@ This is a test. This playbook will launch CentOS on EC2 (1 instance or more than
 
 (3) The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for the IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to be other IAM accounts.
 
-(4) This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it. (
-CentOS 7 (x86_64) - with Updates HVM) 
+(4) This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it. (*CentOS 7 (x86_64) - with Updates HVM*) 
 
 ## How to run 
 ansible-playbook playbook.yml --ask-vault-pass
