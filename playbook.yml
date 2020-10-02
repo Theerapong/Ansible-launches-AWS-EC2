@@ -239,7 +239,7 @@
         var: mycmd 
 
 
-    # - name: i ***** 
+    # - name: testing ***** 
     #   command: "{{ item }}"
     #   with_items:
         # - systemctl stop docker
