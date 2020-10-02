@@ -11,7 +11,7 @@ This is a test. This playbook will launch CentOS on EC2 (1 instance or more than
 
 (4) This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it. (*CentOS 7 (x86_64) - with Updates HVM*) 
 
-## How to run 
+## How to run ?
 ansible-playbook playbook.yml --ask-vault-pass
 
 
