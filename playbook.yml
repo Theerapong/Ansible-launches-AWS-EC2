@@ -122,15 +122,6 @@
         - yum install docker-ce docker-ce-cli containerd.io -y #this is version 19.03.13
       become: true
 
-
-    - name: check if Docker is being run
-      command: systemctl status docker
-      register: docker_check
-      ignore_errors: yes
-      become: true
-    - debug:
-        var: docker_check
-
     
     - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
       pip:
@@ -235,8 +226,6 @@
         sudo cp -v key.pem ~/.docker
         echo 'export DOCKER_HOST="tcp://{{ ansible_ec2_public_hostname }}:2376"' >> $HOME/.bashrc
         echo 'export DOCKER_TLS_VERIFY="1"' >> $HOME/.bashrc
-
-
       
 
     - name: configure Docker to start after reboot # https://www.digitalocean.com/community/questions/how-to-fix-docker-got-permission-denied-while-trying-to-connect-to-the-docker-daemon-socket
@@ -245,3 +234,11 @@
         sudo systemctl enable docker
         sudo chmod 666 /var/run/docker.sock 
     
+
+    - name: check if Docker is being run
+      command: systemctl status docker
+      register: docker_check
+      ignore_errors: yes
+      become: true
+    - debug:
+        var: docker_check
