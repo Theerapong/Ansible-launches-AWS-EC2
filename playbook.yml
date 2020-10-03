@@ -63,15 +63,6 @@
 
     - ec2_metadata_facts:   # Ansible fetches EC2-facts from metadata for futher variables.
 
-    - name: debug *** ansible_ec2_local_ipv4 ***
-      debug: var=ansible_ec2_local_ipv4
-
-    - name: debug *** ansible_ec2_public_ipv4 ***
-      debug: var=ansible_ec2_public_ipv4
-
-    - name: debug *** ansible_ec2_public_hostname ***
-      debug: var=ansible_ec2_public_hostname
-
 
     # - name: Mount volume (EBS) to VM (EC2)  *****
     #   command: "{{ item }}"
@@ -82,7 +73,7 @@
     #     - mount /dev/xvdb /newStorage/
     #   become: true
   
-      
+    
 
     - name: Update OS and downoad OpenSSL *****
       command: "{{ item }}"
@@ -219,21 +210,44 @@
         sudo systemctl start docker
         sudo systemctl enable docker
         sudo chmod 666 /var/run/docker.sock 
+        sudo systemctl start docker
+      register: task_result
     
 
+    - name: Reboot immediately if there was a change.
+      shell: "sleep 5 && reboot"
+      async: 1
+      poll: 0
+      when: task_result is changed
 
+    - name: Wait for the reboot to complete if there was a change.
+      wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300
+      when: task_result is changed
 
     #Swarm section
 
     #docker swarm init --advertise-addr {{ ansible_ec2_local_ipv4 }}
 
 
+      ####################################################################
+      #                                                                  #
+      #    Check statuses                                                #
+      #                                                                  # 
+      ####################################################################
 
-  ####################################################################
-  #                                                                  #
-  #    Check statuses                                                #
-  #                                                                  # 
-  ####################################################################
+    - name: Check status *** ansible_ec2_local_ipv4 ***
+      debug: var=ansible_ec2_local_ipv4
+
+    - name: Check status *** ansible_ec2_public_ipv4 ***
+      debug: var=ansible_ec2_public_ipv4
+
+    - name: Check status *** ansible_ec2_public_hostname ***
+      debug: var=ansible_ec2_public_hostname
+
 
     - name: Check status - Docker is being run ?
       command: systemctl status docker
