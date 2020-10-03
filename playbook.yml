@@ -82,18 +82,6 @@
     #     - mount /dev/xvdb /newStorage/
     #   become: true
   
-
-    - name: Check the size of volumes
-      command: df -h
-      register: check
-    - debug:
-        var: check
-
-    - name: Check the OS
-      command: hostnamectl
-      register: check
-    - debug:
-        var: check
       
 
     - name: Update OS and downoad OpenSSL *****
@@ -216,8 +204,6 @@
       become: true
   
 
-
-
     - name: Secured Docker by default ***** # according to https://unix.stackexchange.com/questions/271514/setting-persistent-environment-variable-in-centos-7-issue
       shell: |
         sudo mkdir -pv ~/.docker
@@ -226,7 +212,7 @@
         sudo cp -v key.pem ~/.docker
         echo 'export DOCKER_HOST="tcp://{{ ansible_ec2_public_hostname }}:2376"' >> $HOME/.bashrc
         echo 'export DOCKER_TLS_VERIFY="1"' >> $HOME/.bashrc
-      
+
 
     - name: configure Docker to start after reboot # https://www.digitalocean.com/community/questions/how-to-fix-docker-got-permission-denied-while-trying-to-connect-to-the-docker-daemon-socket
       shell: |
@@ -235,10 +221,39 @@
         sudo chmod 666 /var/run/docker.sock 
     
 
-    - name: check if Docker is being run
+
+
+    #Swarm section
+
+    #docker swarm init --advertise-addr {{ ansible_ec2_local_ipv4 }}
+
+
+
+  ####################################################################
+  #                                                                  #
+  #    Check statuses                                                #
+  #                                                                  # 
+  ####################################################################
+
+    - name: Check status - Docker is being run ?
       command: systemctl status docker
       register: docker_check
       ignore_errors: yes
       become: true
     - debug:
         var: docker_check
+
+    - name: Check status - The size of volumes
+      command: df -h
+      register: check
+    - debug:
+        var: check
+
+    - name: Check status - OS version
+      command: hostnamectl
+      register: check
+    - debug:
+        var: check
+
+
+   
