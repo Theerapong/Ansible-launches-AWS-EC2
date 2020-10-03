@@ -25,22 +25,22 @@
     - debug:
         var: ec2
 
-    - name: Create volume *****
-      ec2_vol:
-        instance: "{{ item.id }}"
-        aws_access_key: "{{ ec2_access_key }}"
-        aws_secret_key: "{{ ec2_secret_key }}" 
-        name: volume for "{{ item.id }}"
-        region: "{{ AWS_REGION }}"
-        device_name: "{{ DEVICE_NAME }}"
-        volume_size: "{{ VOLUME_SIZE }}"
-        volume_type: "{{ VOLUME_TYPE }}"
-        encrypted: true
-        delete_on_termination: true
-      loop: "{{ ec2.instances }}"
-      register: ec2_vol
-    - debug:
-        var: ec2_vol
+    # - name: Create volume *****
+    #   ec2_vol:
+    #     instance: "{{ item.id }}"
+    #     aws_access_key: "{{ ec2_access_key }}"
+    #     aws_secret_key: "{{ ec2_secret_key }}" 
+    #     name: volume for "{{ item.id }}"
+    #     region: "{{ AWS_REGION }}"
+    #     device_name: "{{ DEVICE_NAME }}"
+    #     volume_size: "{{ VOLUME_SIZE }}"
+    #     volume_type: "{{ VOLUME_TYPE }}"
+    #     encrypted: true
+    #     delete_on_termination: true
+    #   loop: "{{ ec2.instances }}"
+    #   register: ec2_vol
+    # - debug:
+    #     var: ec2_vol
 
 
     - name: Add hosts to inventory  *****
@@ -61,7 +61,7 @@
         delay: 2
         timeout: 200
 
-    - ec2_metadata_facts:   # ansible fetches EC2 facts from metadata for other variables.
+    - ec2_metadata_facts:   # Ansible fetches EC2-facts from metadata for futher variables.
 
     - name: debug *** ansible_ec2_local_ipv4 ***
       debug: var=ansible_ec2_local_ipv4
@@ -73,14 +73,14 @@
       debug: var=ansible_ec2_public_hostname
 
 
-    - name: Mount volume (EBS) to VM (EC2)  *****
-      command: "{{ item }}"
-      with_items:
-        - file -s /dev/xvdb
-        - mkfs -t ext4 /dev/xvdb
-        - mkdir /newStorage
-        - mount /dev/xvdb /newStorage/
-      become: true
+    # - name: Mount volume (EBS) to VM (EC2)  *****
+    #   command: "{{ item }}"
+    #   with_items:
+    #     - file -s /dev/xvdb
+    #     - mkfs -t ext4 /dev/xvdb
+    #     - mkdir /newStorage
+    #     - mount /dev/xvdb /newStorage/
+    #   become: true
   
 
     - name: Check the size of volumes
@@ -96,10 +96,19 @@
         var: check
       
 
-    - name: Update CentOS, install Docker and others *****
+    - name: Update OS and downoad OpenSSL *****
       command: "{{ item }}"
       with_items:
-        - yum update -y
+        - yum clean all  
+        - yum install dnf -y
+        - dnf update -y
+        - dnf install openssl -y
+      become: true
+
+
+    - name: install Python and Docker *****
+      command: "{{ item }}"
+      with_items:
         - yum install python2 -y
         - yum install python3 -y
         - yum install epel-release -y
@@ -110,21 +119,7 @@
         # to install Docker
         - yum install -y yum-utils
         - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
-        # - yum install docker-ce docker-ce-cli containerd.io -y #this is version 19.03.13
-        - yum install docker-ce-18.09.9 docker-ce-cli-18.09.9 containerd.io -y
-
-  #       - dnf install curl -y  # This will install Docker Compose
-  #       - curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  #       - chmod +x /usr/local/bin/docker-compose
-      become: true
-
-
-    - name: Start Docker's services *****
-      command: "{{ item }}"
-      with_items:
-  #       - systemctl daemon-reload
-        - systemctl start docker
-        - systemctl enable docker
+        - yum install docker-ce docker-ce-cli containerd.io -y #this is version 19.03.13
       become: true
 
 
@@ -145,7 +140,7 @@
 
   # ####################################################################
   # #                                                                  #
-  # #    Protect the Docker daemon to be secure                        #
+  # #    Protect the Docker daemon socket to be secure                 #
   # #                                                                  #
   # #    According to https://docs.docker.com/engine/security/https/   #
   # #                                                                  # 
@@ -230,22 +225,23 @@
       become: true
   
 
-    # ***** still error here at "dockerd" !!! ***
-    - name: Make the Docker daemon only accept connections from clients providing a certificate trusted by your CA *****
-      command: dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
-      become: true
-      register: mycmd
-    - debug:
-        var: mycmd 
 
 
-    # - name: testing ***** 
-    #   command: "{{ item }}"
-    #   with_items:
-        # - systemctl stop docker
-        # - rm -rf /var/lib/docker
-        # - systemctl start docker
-        # - ps axf | grep docker | grep -v grep | awk '{print "kill -9 " $1}' | sudo sh
-        # - rm /var/run/docker.pid
-        # - dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376  
-      # become: true
+    - name: Secured Docker by default ***** # according to https://unix.stackexchange.com/questions/271514/setting-persistent-environment-variable-in-centos-7-issue
+      shell: |
+        sudo mkdir -pv ~/.docker
+        sudo cp -v ca.pem ~/.docker
+        sudo cp -v cert.pem ~/.docker
+        sudo cp -v key.pem ~/.docker
+        echo 'export DOCKER_HOST="tcp://{{ ansible_ec2_public_hostname }}:2376"' >> $HOME/.bashrc
+        echo 'export DOCKER_TLS_VERIFY="1"' >> $HOME/.bashrc
+
+
+      
+
+    - name: configure Docker to start after reboot # https://www.digitalocean.com/community/questions/how-to-fix-docker-got-permission-denied-while-trying-to-connect-to-the-docker-daemon-socket
+      shell: |
+        sudo systemctl start docker
+        sudo systemctl enable docker
+        sudo chmod 666 /var/run/docker.sock 
+    
