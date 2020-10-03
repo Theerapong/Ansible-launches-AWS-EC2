@@ -59,7 +59,7 @@
     - name: wait for SSH *****
       wait_for_connection:
         delay: 2
-        timeout: 200
+        timeout: 300
 
     - ec2_metadata_facts:   # Ansible fetches EC2-facts from metadata for futher variables.
 
@@ -91,7 +91,7 @@
         - yum install python2 -y
         - yum install python3 -y
         - yum install epel-release -y
-        - yum install python-pip -y
+        # - yum install python-pip -y   #for centOS 7
         - pip2 install pexpect
         - pip3 install pexpect
 
@@ -99,6 +99,8 @@
         - yum install -y yum-utils
         - yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo  # enable Docker CE repository
         - yum install docker-ce docker-ce-cli containerd.io -y #this is version 19.03.13
+        - dnf install wget -y
+        - wget https://download.docker.com/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker.repo # for Docker Swarm
       become: true
 
     
@@ -108,13 +110,13 @@
       become: yes
 
 
-  # ####################################################################
-  # #                                                                  #
-  # #    Protect the Docker daemon socket to be secure                 #
-  # #                                                                  #
-  # #    According to https://docs.docker.com/engine/security/https/   #
-  # #                                                                  # 
-  # ####################################################################
+      ####################################################################
+      #                                                                  #
+      #    Protect the Docker daemon socket to be secure                 #
+      #                                                                  #
+      #    According to https://docs.docker.com/engine/security/https/   #
+      #                                                                  # 
+      ####################################################################
 
     - name: Generate the Private Key *******
       expect:
@@ -210,12 +212,13 @@
         sudo systemctl start docker
         sudo systemctl enable docker
         sudo chmod 666 /var/run/docker.sock 
-        sudo systemctl start docker
       register: task_result
-    
+
+        # sudo usermod -aG docker centos
+        # newgrp - docker
 
     - name: Reboot immediately if there was a change.
-      shell: "sleep 5 && reboot"
+      shell: "sudo reboot"
       async: 1
       poll: 0
       when: task_result is changed
@@ -223,15 +226,53 @@
     - name: Wait for the reboot to complete if there was a change.
       wait_for_connection:
         connect_timeout: 20
-        sleep: 5
-        delay: 5
+        delay: 2
         timeout: 300
       when: task_result is changed
 
-    #Swarm section
+
+      ####################################################################
+      #                                                                  #
+      #    Swarm configuration                                           #
+      #                                                                  # 
+      ####################################################################
+
 
     #docker swarm init --advertise-addr {{ ansible_ec2_local_ipv4 }}
 
+#(1 & 2)  #https://www.tecmint.com/install-configure-firewalld-in-centos-ubuntu/
+# rpm -qa firewalld    
+# sudo dnf install firewalld -y
+# sudo systemctl start firewalld
+# sudo systemctl enable firewalld
+
+
+
+#(1 & 2)
+# sudo vi /etc/hosts
+# 172.31.7.134  managernode
+# 172.31.7.108  workernode1
+
+#(1)
+# sudo hostnamectl set-hostname managernode
+
+#(2)
+#sudo hostnamectl set-hostname workernode1
+
+
+#(1&2)
+# sudo firewall-cmd --permanent --add-port=2376/tcp
+# sudo firewall-cmd --permanent --add-port=2377/tcp
+# sudo firewall-cmd --permanent --add-port=7946/tcp
+# sudo firewall-cmd --permanent --add-port=80/tcp
+# sudo firewall-cmd --permanent --add-port=7946/udp
+# sudo firewall-cmd --permanent --add-port=4789/udp
+# sudo firewall-cmd --reload
+# sudo systemctl restart docker
+
+
+#(1)
+# sudo docker swarm init --advertise-addr 172.31.7.134
 
       ####################################################################
       #                                                                  #
