@@ -46,7 +46,8 @@
         name:   "K8S_TOKEN_HOLDER"
         token:  "{{ K8S_TOKEN.stdout }}"
         # name:   "CREATE_A_SWARM"
-        # token:  "{{ COMMAND.stdout_lines }}"   # ref:How do I set register a variable to persist between plays in ansible?
+        # token:  "{{ COMMAND.stdout_lines }}"   # https://stackoverflow.com/questions/33896847/how-do-i-set-register-a-variable-to-persist-between-plays-in-ansible
+        
 
 
 
