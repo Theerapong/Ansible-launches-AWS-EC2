@@ -1,5 +1,5 @@
 ## Overall
-This is a test. This playbook will launch CentOS on EC2 (1 instance or more than 1).  The goal is to install and configure Docker Swarm Cluster.
+This is a test. This playbook intents to launch CentOS on 2 EC2 instances.  The goal is to install and configure Docker Swarm Cluster.
 
 
 ## Prepare variables and others
