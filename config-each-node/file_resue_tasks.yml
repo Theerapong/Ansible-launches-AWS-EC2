@@ -1,0 +1,12 @@
+    - name: shell command
+      shell: |
+        sudo hostnamectl set-hostname managernode
+        sudo chmod 777 /etc/hosts
+        
+    - name: write host file
+      shell: |
+        sudo echo "{{ managernode_private_ip }} managernode" >> /etc/hosts
+        sudo echo "{{ workernode1_private_ip }} workernode1" >> /etc/hosts
+
+    - name: change permission back to be -rw-r--r-- 
+      shell: sudo chmod 644 /etc/hosts

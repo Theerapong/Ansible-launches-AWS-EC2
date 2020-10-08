@@ -1,8 +1,14 @@
+# ansible-playbook playbook.yml --ask-vault-pass
+
 - hosts: localhost
   gather_facts: no
   vars_files:
     - variables/vars.yml
     - variables/encrypt-iam-account.yml
+  vars:
+    instance_names:
+      - eggroll1
+      - eggroll2
   tasks:
     - name: provision CentOS VM (EC2) *****
       ec2:
@@ -16,14 +22,17 @@
         vpc_subnet_id: "{{ VPC_SUBNET_ID }}"
         group_id: "{{ GROUP_ID }}"
         wait: true
+
         exact_count: "{{ EXACT_COUNT }}"    
         count_tag: 
           Name: Demo
         instance_tags:
-          Name: "{{ INSTANCE_TAGS }}"
+          Name: "{{ INSTANCE_TAGS }}"    
+
       register: ec2
     - debug:
         var: ec2
+
 
     # - name: Create volume *****
     #   ec2_vol:
@@ -42,7 +51,6 @@
     # - debug:
     #     var: ec2_vol
 
-
     - name: Add hosts to inventory  *****
       add_host:
         hostname: '{{ item.public_ip }}'
@@ -50,8 +58,10 @@
         ansible_ssh_common_args: "-o StrictHostKeyChecking=no" # we attach a variable to "demogroup", We don't want to confirm the key validation
         ansible_ssh_private_key_file: keypair-for-ansible.pem
       loop: '{{ ec2.instances }}'
-    
-      
+
+
+   
+   
 - hosts: demogroup
   gather_facts: no  # if this is "yes" , then a SSH will no be waiting for long.
   remote_user: centos
@@ -62,6 +72,7 @@
         timeout: 300
 
     - ec2_metadata_facts:   # Ansible fetches EC2-facts from metadata for futher variables.
+
 
 
     # - name: Mount volume (EBS) to VM (EC2)  *****
@@ -236,8 +247,8 @@
       #    Swarm configuration                                           #
       #                                                                  # 
       ####################################################################
-
-
+    #https://medium.com/@Alibaba_Cloud/how-to-install-and-configure-docker-swarm-mode-on-centos-7-c0b32f0fbc82
+    
     #docker swarm init --advertise-addr {{ ansible_ec2_local_ipv4 }}
 
 #(1 & 2)  #https://www.tecmint.com/install-configure-firewalld-in-centos-ubuntu/
@@ -245,20 +256,6 @@
 # sudo dnf install firewalld -y
 # sudo systemctl start firewalld
 # sudo systemctl enable firewalld
-
-
-
-#(1 & 2)
-# sudo vi /etc/hosts
-# 172.31.7.134  managernode
-# 172.31.7.108  workernode1
-
-#(1)
-# sudo hostnamectl set-hostname managernode
-
-#(2)
-#sudo hostnamectl set-hostname workernode1
-
 
 #(1&2)
 # sudo firewall-cmd --permanent --add-port=2376/tcp
@@ -270,9 +267,47 @@
 # sudo firewall-cmd --reload
 # sudo systemctl restart docker
 
+    - name: Configure Firewall for Docker Swarm
+      shell: |
+        rpm -qa firewalld
+        sudo dnf install firewalld -y
+        sudo systemctl start firewalld
+        sudo systemctl enable firewalld
+        sudo firewall-cmd --permanent --add-port=2376/tcp
+        sudo firewall-cmd --permanent --add-port=2377/tcp
+        sudo firewall-cmd --permanent --add-port=7946/tcp
+        sudo firewall-cmd --permanent --add-port=80/tcp
+        sudo firewall-cmd --permanent --add-port=7946/udp
+        sudo firewall-cmd --permanent --add-port=4789/udp
+        sudo firewall-cmd --reload
+        sudo systemctl restart docker
+        
+
+#sudo echo '1.2.3.4 testtest' >> /etc/hosts
+
+#(1 & 2)
+# sudo vi /etc/hosts
+# \\private\\
+# 172.31.7.145  managernode
+# 172.31.7.197  workernode1
 
 #(1)
-# sudo docker swarm init --advertise-addr 172.31.7.134
+# sudo hostnamectl set-hostname managernode
+
+#(2)
+#sudo hostnamectl set-hostname workernode1
+
+
+#(1)
+# sudo docker swarm init --advertise-addr \\private\\54.200.91.58
+# sudo docker swarm init --advertise-addr 172.31.7.145
+
+#(2)
+#docker swarm join --token SWMTKN-1-xxxxxxxxx- \\private\\192.168.0.102:2377
+
+
+
+
 
       ####################################################################
       #                                                                  #

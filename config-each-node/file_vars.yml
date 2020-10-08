@@ -1,0 +1,16 @@
+ansible_ssh_private_key_file : keypair-for-ansible.pem
+
+
+managernode:
+  hosts: 
+    ec2-54-244-40-227.us-west-2.compute.amazonaws.com
+
+managernode_private_ip : 54.244.40.227
+    
+
+workernode1 :
+  hosts: 
+    ec2-34-215-162-58.us-west-2.compute.amazonaws.com
+    
+workernode1_private_ip : 34.215.162.58
+
