@@ -35,9 +35,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
 - Some variable (key pair, vpc subnet id, group id) in "vars-others.yml" needs to be prepared in order to specify the location of the VM.
 
-- The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for the IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to be other IAM accounts.
-
-- This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it before run playbook.
+- This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it  (CentOS 7 ,  By: ProComputers.com). 
 
 ### At folder "2.config-nodes"
 
