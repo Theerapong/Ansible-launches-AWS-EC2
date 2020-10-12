@@ -41,7 +41,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
     ##### ( How to run ? )
 
-- Run by this command , "ansible-playbook playbook-provision-vm.yml --ask-vault-pass"
+- Run by this command , *"ansible-playbook playbook-provision-vm.yml --ask-vault-pass"
 
 #### [ At folder "2.config-nodes" ]
 
@@ -49,7 +49,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
     ##### ( How to run ? )
 
-- Run by this command , "ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml"
+- Run by this command , *"ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml"
 
 
 
