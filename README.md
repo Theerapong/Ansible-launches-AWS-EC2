@@ -1,10 +1,10 @@
-## Overall
+# Overall
 This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal is to install and configure Docker Swarm cluster.
 
 
 
 
-## Prerequisites for the local machine
+# Prerequisites for the local machine
 (1) These playbooks use Ansible version 2.9 (it is installed on the virtualenv)
 
 (2) At the local machine, we need to install following:
@@ -26,7 +26,7 @@ This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal
 - pip3 install dnspython
 
 
-## Prepare variables, and How to run the playbook .
+# Prepare variables, and How to run the playbook .
 
 Firstly, we will run the playbook in folder "1.provision-vm", then we will run the playbook in folder "2.config-nodes".
 
@@ -54,7 +54,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
 
 
-## Reference
+# Reference
 - Course "Managing AWS with Ansible" from "A CLOUD GURU" .
 
 - https://www.linuxtechi.com/install-docker-ce-centos-8-rhel-8/
