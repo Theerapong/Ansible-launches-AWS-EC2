@@ -26,7 +26,7 @@ This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal
 - pip3 install dnspython
 
 
-# Prepare variables, and How to run the playbook .
+# Prepare variables, and How to run the playbooks .
 
 Firstly, we will run the playbook in folder "1.provision-vm", then we will run the playbook in folder "2.config-nodes".
 
