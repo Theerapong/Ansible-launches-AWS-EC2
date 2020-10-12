@@ -26,14 +26,14 @@ This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal
 
 ## Prepare variables, and How to run the playbook .
 
-
+Firstly, we will run the playbook in folder "1.provision-vm", then we will run the playbook in folder "2.config-nodes".
 
 ### At folder "1.provision-vm" 
 
 
 - "AWS Access Key" and "AWS Secret Key" are encrypted in "vars-encrypted-aws-keys.yml" .
 
-- We can change the size and location of VMs in this file at "variables/var.yml". 
+- Some variable (key pair, vpc subnet id, group id) in "vars-others.yml" needs to be prepared in order to specify the location of the VM.
 
 - The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for the IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to be other IAM accounts.
 
