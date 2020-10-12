@@ -5,7 +5,7 @@ This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal
 ## Prerequisite for this Playbook
 (1) These playbooks use Ansible version 2.9 (it is installed on the virtualenv)
 
-(2)At the local machine, we need to install following:
+(2) At the local machine, we need to install following:
 
 pip3 install ansible
 
