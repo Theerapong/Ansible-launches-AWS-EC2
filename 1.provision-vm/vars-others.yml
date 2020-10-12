@@ -9,9 +9,9 @@ GROUP_ID: "sg-14e5924e"
 EXACT_COUNT: 2            #  to run 1 instance, 2 instances or more
 INSTANCE_TAGS: "CentOS VM - cluster"
 
-IMAGE: "ami-060396dd859d237db" # CentOS 8 Minimal (CentOS 8.2.2004)    #(By ProComputers.com) from the AWS Marketplace (Region US-West Oregon)
+# IMAGE: "ami-060396dd859d237db" # CentOS 8 Minimal (CentOS 8.2.2004)    #(By ProComputers.com) from the AWS Marketplace (Region US-West Oregon)
 # IMAGE: "ami-0bc06212a56393ee1" # CentOS 7 (x86_64) - with Updates HVM #(By Centos.org) from the AWS Marketplace (Region US-West Oregon)
-# IMAGE: "ami-0f558f42dd6504f6a" # CentOS 7                             #(By: ProComputers.com)
+IMAGE: "ami-0f558f42dd6504f6a" # CentOS 7                             #(By: ProComputers.com)
 
 
 #######################
