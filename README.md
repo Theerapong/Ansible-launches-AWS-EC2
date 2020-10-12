@@ -45,7 +45,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
 #### [ At folder "2.config-nodes" ]
 
-- In "vars-hosts.yml", public DNS(s) and private IP(s) need to be assigned here.
+- In "vars-hosts.yml", public DNS(s) and private IP(s) need to be assigned here for both VMs.
 
     ##### ( How to run ? )
 
