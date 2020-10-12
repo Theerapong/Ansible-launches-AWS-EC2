@@ -49,7 +49,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
     ##### (How to run ?)
 
-- Run by this command , "ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml
+- Run by this command , "ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml"
 
 
 
