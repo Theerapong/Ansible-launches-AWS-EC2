@@ -26,7 +26,7 @@ pip3 install dnspython
 
 ## Prepare variables and others before run a playbook
 
-# At folder "1.provision-vm" 
+#### At folder "1.provision-vm" 
 
 (1) We can change the size and location of VMs in this file at "variables/var.yml". 
 
@@ -34,7 +34,7 @@ pip3 install dnspython
 
 (3) This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it before run playbook.
 
-# At folder "2.config-nodes"
+###### At folder "2.config-nodes"
 
 
 ## How to run ?
