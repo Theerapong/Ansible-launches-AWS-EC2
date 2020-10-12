@@ -30,7 +30,7 @@ This is a test. This project intents to launch two CentOS VMs on AWS EC2.  The g
 
 Firstly, we will run the playbook in folder "1.provision-vm", then we will run the playbook in folder "2.config-nodes".
 
-#### [ At folder "1.provision-vm" ]
+### [ At folder "1.provision-vm" ]
 
 
 - In "vars-encrypted-aws-keys.yml" , prepares "AWS Access Key" and "AWS Secret Key" which are encrypted .
@@ -39,15 +39,15 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
 - This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it  ("CentOS 7" ,  By: ProComputers.com). 
 
-    ##### ( How to run ? )
+    #### ( How to run ? )
 
 - Run by this command , *"ansible-playbook playbook-provision-vm.yml --ask-vault-pass"*
 
-#### [ At folder "2.config-nodes" ]
+### [ At folder "2.config-nodes" ]
 
 - In "vars-hosts.yml", public DNS(s) and private IP(s) need to be assigned here for both VMs.
 
-    ##### ( How to run ? )
+    #### ( How to run ? )
 
 - Run by this command , *"ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml"*
 
