@@ -2,6 +2,8 @@
 This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal is to install and configure Docker Swarm cluster.
 
 
+
+
 ## Prerequisites for the Playbook
 (1) These playbooks use Ansible version 2.9 (it is installed on the virtualenv)
 
@@ -49,6 +51,8 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 #### (How to run ?)
 
 - Run by this command , "ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml
+
+
 
 
 ## Reference
