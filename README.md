@@ -37,13 +37,18 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 
 - This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it  ("CentOS 7" ,  By: ProComputers.com). 
 
-#### * (how to run)
+#### (How to run ?)
 
 - Run by this command , "ansible-playbook playbook-provision-vm.yml --ask-vault-pass"
 
 ### At folder "2.config-nodes"
 
 -
+
+
+#### (How to run ?)
+
+- Run by this command , "ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml
 
 
 ## Reference
