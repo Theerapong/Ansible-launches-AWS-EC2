@@ -1,12 +1,10 @@
-    - name: shell command
-      shell: |
-        sudo hostnamectl set-hostname managernode
-        sudo chmod 777 /etc/hosts
+    - name: reuse-task - change permission of hosts file to be writable
+      shell: sudo chmod 777 /etc/hosts
         
-    - name: write host file
+    - name: reuse-task - write nodes information to the hosts file
       shell: |
         sudo echo "{{ managernode_private_ip }} managernode" >> /etc/hosts
         sudo echo "{{ workernode_private_ip }} workernode" >> /etc/hosts
 
-    - name: change permission back to be -rw-r--r-- 
+    - name: reuse-task - change permission of hosts file back
       shell: sudo chmod 644 /etc/hosts

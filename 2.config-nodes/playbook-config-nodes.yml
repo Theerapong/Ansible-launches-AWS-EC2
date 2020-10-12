@@ -1,65 +1,17 @@
-  ####################################################################
-  #                                                                  #
-  #    Config SSH                                                    #
-  #                                                                  # 
-  ####################################################################
-
-# - name: test ssh - managernode
-#   hosts: managernode
-#   gather_facts: no
-#   remote_user: centos
-#   vars_files:
-#     vars-hosts.yml
-#   tasks:
-#     # ***
-#     - name: test ssh - shell command
-#       shell: |
-#         sudo chmod 777 /etc/ssh/ssh_config
-#     - name: test ssh - write ssh_config
-#       shell: |
-#         sudo echo "TCPKeepAlive no" >> /etc/ssh/ssh_config
-#         sudo echo "ClientAliveInterval 30" >> /etc/ssh/ssh_config
-#         sudo echo "ClientAliveCountMax 3600" >> /etc/ssh/ssh_config
-#         sudo systemctl restart sshd.service
-#         sudo echo "ServerAliveInterval 30" >> /etc/ssh/ssh_config
-#     - name: test ssh - change permission back to be -rw-r--r-- 
-#       shell: sudo chmod 644 /etc/ssh/ssh_config
-# - name: test ssh - workernode
-#   hosts: workernode
-#   gather_facts: no
-#   remote_user: centos
-#   vars_files:
-#     vars-hosts.yml
-#   tasks:
-#     # ***
-#     - name: test ssh - shell command
-#       shell: |
-#         sudo chmod 777 /etc/ssh/ssh_config
-#     - name: test ssh - write ssh_config
-#       shell: |
-#         sudo echo "TCPKeepAlive no" >> /etc/ssh/ssh_config
-#         sudo echo "ClientAliveInterval 30" >> /etc/ssh/ssh_config
-#         sudo echo "ClientAliveCountMax 3600" >> /etc/ssh/ssh_config
-#         sudo systemctl restart sshd.service
-#         sudo echo "ServerAliveInterval 30" >> /etc/ssh/ssh_config
-#     - name: test ssh - change permission back to be -rw-r--r-- 
-#       shell: sudo chmod 644 /etc/ssh/ssh_config
-    # ***
-
-# ansible-playbook -i hosts playbook-managernode.yml
-# aws --region us-west-2 ec2 create-tags --resources i-0914892a3bac5ff82 --tags "Key=Name,Value=Web01"
+# source /Users/jam/bin/activate
 
 # sudo docker node ls
+# sudo docker service ps webservice
 # sudo docker swarm leave --force
-
 # ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml
+
 
   ####################################################################
   #                                                                  #
-  #    Manager Node                                                  #
+  #    Configure Manager Node                                        #
   #                                                                  # 
   ####################################################################
-- name: managernode
+- name: Configure Manager Node
   hosts: managernode
   gather_facts: no
   remote_user: centos
@@ -67,26 +19,14 @@
     vars-hosts.yml
   tasks:
 
-    # ***
-    # - name: managernode - shell command
-    #   shell: |
-    #     sudo hostnamectl set-hostname managernode
-    #     sudo chmod 777 /etc/hosts
-        
-    # - name: managernode - write host file
-    #   shell: |
-    #     sudo echo "{{ managernode_private_ip }} managernode" >> /etc/hosts
-    #     sudo echo "{{ workernode_private_ip }} workernode" >> /etc/hosts
+    - name: managernode - set hostname
+      shell: sudo hostnamectl set-hostname managernode
 
-    # - name: managernode - change permission back to be -rw-r--r-- 
-    #   shell: sudo chmod 644 /etc/hosts
-    # ***
-
-    - name: include task 
+    - name: managernode - include task 
       include_tasks: reuse-tasks.yml
 
 
-    - name: managernode - run Docker Swarm join
+    - name: managernode - initialize a Swarm # This will grab only the token-string by Shell script, in order to assign to the WorkerNode.
       shell: |
         line=`sudo docker swarm init`
         var="${line:142}"
@@ -97,17 +37,15 @@
     - name: managernode - register a variable
       add_host:
         name:   "REGISTER_VARIABLE"
-        token:  "{{ SWARM_TOKEN.stdout }}"
-        # name:   "CREATE_A_SWARM"
-        # token:  "{{ COMMAND.stdout_lines }}"   # https://stackoverflow.com/questions/33896847/how-do-i-set-register-a-variable-to-persist-between-plays-in-ansible
+        token:  "{{ SWARM_TOKEN.stdout }}"     # Ref: https://stackoverflow.com/questions/33896847/how-do-i-set-register-a-variable-to-persist-between-plays-in-ansible
         
 
   ####################################################################
   #                                                                  #
-  #    Worker Node                                                   #
+  #    Configure Worker Node                                         #
   #                                                                  # 
   ####################################################################
-- name: workernode
+- name: Configure Worker Node
   hosts: workernode
   gather_facts: no
   remote_user: centos
@@ -115,28 +53,15 @@
     vars-hosts.yml
   tasks:
 
-  # ***
-    # - name: workernode - shell command
-    #   shell: |
-    #     sudo hostnamectl set-hostname workernode
-    #     sudo chmod 777 /etc/hosts
-        
-    # - name: workernode - write host file
-    #   shell: |
-    #     sudo echo "{{ managernode_private_ip }} managernode" >> /etc/hosts
-    #     sudo echo "{{ workernode_private_ip }} workernode" >> /etc/hosts
+    - name: workernode - set hostname
+      shell: sudo hostnamectl set-hostname workernode
 
-    # - name: workernode - change permission back to be -rw-r--r-- 
-    #   shell: sudo chmod 644 /etc/hosts
-    # ***
-    - name: include task 
+    - name: workernode - include task 
       include_tasks: reuse-tasks.yml
-
 
     - name: workernode - show register a variable
       debug:
         msg: "{{ hostvars['REGISTER_VARIABLE']['token'] }}"
-
   
     - name: workernode - join the Docker Swarm
       shell: |
@@ -145,10 +70,10 @@
 
   ####################################################################
   #                                                                  #
-  #    Deploy service                                                #
+  #    Deploy service at Manager Node                                #
   #                                                                  # 
   ####################################################################
-- name: deploy
+- name: Deploy service at Manager Node
   hosts: managernode
   gather_facts: no
   remote_user: centos
@@ -156,12 +81,7 @@
     vars-hosts.yml
   tasks:
 
-    - name: deploy - shell command
+    - name: deploy - deploy webservice
       shell: |
         sudo docker service create -p 80:80 --name webservice --replicas 5 httpd
 
-
-# sudo docker node ls
-# sudo docker service ps webservice
-# sudo docker swarm leave --force
-# ansible-playbook -i vars-hosts.yml playbook-config-nodes.yml

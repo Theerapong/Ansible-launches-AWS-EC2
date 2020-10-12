@@ -6,12 +6,8 @@
   vars_files:
     - vars-others.yml
     - vars-encrypted-aws-keys.yml
-  vars:
-    instance_names:
-      - eggroll1
-      - eggroll2
   tasks:
-    - name: provision CentOS VM (EC2) *****
+    - name: provision CentOS VM (EC2) 
       ec2:
         aws_access_key: "{{ ec2_access_key }}"
         aws_secret_key: "{{ ec2_secret_key }}" 
@@ -26,7 +22,7 @@
 
         exact_count: "{{ EXACT_COUNT }}"    
         count_tag: 
-          Name: Demo
+          Name: Tag
         instance_tags:
           Name: "{{ INSTANCE_TAGS }}"    
 
@@ -35,7 +31,7 @@
         var: ec2
 
 
-    - name: Create volume *****
+    - name: Create volume 
       ec2_vol:
         instance: "{{ item.id }}"
         aws_access_key: "{{ ec2_access_key }}"
@@ -52,22 +48,22 @@
     - debug:
         var: ec2_vol
 
-    - name: Add hosts to inventory  *****
+    - name: Add hosts to inventory  
       add_host:
         hostname: '{{ item.public_ip }}'
-        groupname: demogroup  # after this section is run, then we have the IPs in "demogroup"
-        ansible_ssh_common_args: "-o StrictHostKeyChecking=no" # we attach a variable to "demogroup", We don't want to confirm the key validation
+        groupname: hostsgroup  # after this section is run, then we have the IPs in "hostsgroup"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no" # we attach a variable to "hostsgroup", We don't want to confirm the key validation
         ansible_ssh_private_key_file: ../keypair-for-ansible.pem
       loop: '{{ ec2.instances }}'
 
 
    
    
-- hosts: demogroup
+- hosts: hostsgroup
   gather_facts: no  # if this is "yes" , then a SSH will no be waiting for long.
   remote_user: centos
   tasks:
-    - name: wait for SSH *****
+    - name: wait for SSH 
       wait_for_connection:
         delay: 2
         timeout: 300
@@ -76,7 +72,7 @@
 
 
 
-    - name: Mount volume (EBS) to VM (EC2)  *****
+    - name: Mount volume (EBS) to VM (EC2)  
       command: "{{ item }}"
       with_items:
         - file -s /dev/xvdb
@@ -87,7 +83,7 @@
   
     
 
-    - name: Update OS and downoad OpenSSL *****
+    - name: Update OS and downoad OpenSSL 
       command: "{{ item }}"
       with_items:
         - yum clean all  
@@ -97,16 +93,16 @@
       become: true
 
 
-    - name: install Python and Docker *****
+    - name: install Python and Docker 
       command: "{{ item }}"
       with_items:
-        - yum install python2 -y
+        # - yum install python2 -y
         - yum install python3 -y
         - yum install epel-release -y
 
         # to install pip
         - yum install python-pip -y   #for centOS 7
-        - pip2 install pexpect
+        # - pip2 install pexpect
         - pip3 install pexpect
 
         # to install Docker
@@ -118,7 +114,7 @@
       become: true
 
     
-    - name: install pexpect ***** # if we want to execute linux command, we need to install PEXPECT
+    - name: install pexpect  # if we want to execute linux command, we need to install PEXPECT
       pip:
         name: pexpect
       become: yes
@@ -132,7 +128,7 @@
       #                                                                  # 
       ####################################################################
 
-    - name: Generate the Private Key *******
+    - name: Generate the Private Key 
       expect:
         command: openssl genrsa -aes256 -out ca-key.pem 4096
         responses:
@@ -141,7 +137,7 @@
       no_log: false # don't want to show passwords in logs
   
 
-    - name: Generate the Public Key (SSL certificate) *******
+    - name: Generate the Public Key (SSL certificate) 
       expect:
         command: openssl req -new -x509 -days 365 -key ca-key.pem -sha256 -out ca.pem
         responses:
@@ -156,7 +152,7 @@
       no_log: false
 
     
-    - name: Create a server key and certificate signing request (CSR) *****
+    - name: Create a server key and certificate signing request (CSR) 
       command: "{{ item }}"
       with_items:
         - openssl genrsa -out server-key.pem 4096
@@ -164,17 +160,17 @@
       become: true
 
 
-    - name: Sign the public key with our CA  (1) *** #  to allow connections 
+    - name: Sign the public key with our CA  (1)  #  to allow connections 
       shell: echo "subjectAltName = DNS:{{ ansible_ec2_public_hostname }},IP:{{ ansible_ec2_public_ipv4 }},IP:{{ ansible_ec2_local_ipv4 }}" > extfile.cnf
       args:
         creates: "extfile.cnf"
   
-    - name: Sign the public key with our CA  (2) *** # Set the Docker daemon key’s extended usage attributes to be used only for server authentication:
+    - name: Sign the public key with our CA  (2)  # Set the Docker daemon key’s extended usage attributes to be used only for server authentication:
       shell: echo "extendedKeyUsage = serverAuth" > extfile.cnf
  
 
 
-    - name: Generate the signed certificate *******
+    - name: Generate the signed certificate 
       expect:
         command: openssl x509 -req -days 365 -sha256 -in server.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -extfile extfile.cnf
         responses:
@@ -182,7 +178,7 @@
       no_log: false # don't want to show passwords in logs
 
 
-    - name: Create a client key and certificate signing request (For client authentication) *****
+    - name: Create a client key and certificate signing request (For client authentication) 
       command: "{{ item }}"
       with_items:
         - openssl genrsa -out key.pem 4096
@@ -190,11 +186,11 @@
       become: true
 
 
-    - name: Create a new extensions config file (To make the key suitable for client authentication) ***
+    - name: Create a new extensions config file (To make the key suitable for client authentication) 
       shell: echo "extendedKeyUsage = clientAuth" > extfile-client.cnf
 
 
-    - name: Generate the signed certificate *******
+    - name: Generate the signed certificate 
       expect:
         command: openssl x509 -req -days 365 -sha256 -in client.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out cert.pem -extfile extfile-client.cnf
         responses:
@@ -202,7 +198,7 @@
       no_log: false
     
 
-    - name: Remove some file and change permission to others ***** #After generating cert.pem and server-cert.pem , we can safely remove the two certificate signing requests and extensions config files
+    - name: Remove some file and change permission to others  #After generating cert.pem and server-cert.pem , we can safely remove the two certificate signing requests and extensions config files
       command: "{{ item }}"
       with_items:
         - rm -v client.csr server.csr extfile.cnf extfile-client.cnf
@@ -211,7 +207,7 @@
       become: true
   
 
-    - name: Secured Docker by default ***** # according to https://unix.stackexchange.com/questions/271514/setting-persistent-environment-variable-in-centos-7-issue
+    - name: Secured Docker by default  # according to https://unix.stackexchange.com/questions/271514/setting-persistent-environment-variable-in-centos-7-issue
       shell: |
         sudo mkdir -pv ~/.docker
         sudo cp -v ca.pem ~/.docker
@@ -247,15 +243,12 @@
 
       ####################################################################
       #                                                                  #
-      #    Swarm configuration                                           #
+      #    Configure Docker Swarm                                        #
       #                                                                  # 
       ####################################################################
-    #https://medium.com/@Alibaba_Cloud/how-to-install-and-configure-docker-swarm-mode-on-centos-7-c0b32f0fbc82
+    # https://medium.com/@Alibaba_Cloud/how-to-install-and-configure-docker-swarm-mode-on-centos-7-c0b32f0fbc82
     
-    #docker swarm init --advertise-addr {{ ansible_ec2_local_ipv4 }}
 
-
-    #(1 & 2)  #https://www.tecmint.com/install-configure-firewalld-in-centos-ubuntu/
     - name: Configure Firewall for Docker Swarm
       shell: |
         rpm -qa firewalld
@@ -271,31 +264,6 @@
         sudo firewall-cmd --reload
         sudo systemctl restart docker
         
-
-#sudo echo '1.2.3.4 testtest' >> /etc/hosts
-
-#(1 & 2)
-# sudo vi /etc/hosts
-# \\private\\
-# 172.31.7.145  managernode
-# 172.31.7.197  workernode1
-
-#(1)
-# sudo hostnamectl set-hostname managernode
-
-#(2)
-#sudo hostnamectl set-hostname workernode1
-
-
-#(1)
-# sudo docker swarm init --advertise-addr \\private\\54.200.91.58
-# sudo docker swarm init --advertise-addr 172.31.7.145
-
-#(2)
-#docker swarm join --token SWMTKN-1-xxxxxxxxx- \\private\\192.168.0.102:2377
-
-
-
 
 
       ####################################################################
