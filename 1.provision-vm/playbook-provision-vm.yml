@@ -96,13 +96,11 @@
     - name: install Python and Docker 
       command: "{{ item }}"
       with_items:
-        # - yum install python2 -y
         - yum install python3 -y
         - yum install epel-release -y
 
         # to install pip
         - yum install python-pip -y   #for centOS 7
-        # - pip2 install pexpect
         - pip3 install pexpect
 
         # to install Docker
