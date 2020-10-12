@@ -57,8 +57,7 @@
       loop: '{{ ec2.instances }}'
 
 
-   
-   
+  
 - hosts: hostsgroup
   gather_facts: no  # if this is "yes" , then a SSH will no be waiting for long.
   remote_user: centos
@@ -96,12 +95,9 @@
     - name: install Python and Docker 
       command: "{{ item }}"
       with_items:
+        # to install Python
         - yum install python3 -y
-        - yum install epel-release -y
-
-        # to install pip
         - yum install python-pip -y   #for centOS 7
-        - pip3 install pexpect
 
         # to install Docker
         - yum install -y yum-utils
