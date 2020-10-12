@@ -24,21 +24,23 @@ pip3 install pexpect
 pip3 install dnspython
 
 
-## Prepare variables and others before run a playbook
+## Prepare variables, and How to run the playbook .
+
+
 
 ### At folder "1.provision-vm" 
 
-(1) We can change the size and location of VMs in this file at "variables/var.yml". 
 
-(2) The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for the IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to be other IAM accounts.
+- "AWS Access Key" and "AWS Secret Key" are encrypted in "vars-encrypted-aws-keys.yml" .
 
-(3) This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it before run playbook.
+- We can change the size and location of VMs in this file at "variables/var.yml". 
+
+- The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for the IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to be other IAM accounts.
+
+- This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it before run playbook.
 
 ### At folder "2.config-nodes"
 
-
-## How to run ?
-ansible-playbook playbook.yml --ask-vault-pass
 
 
 ## Reference
