@@ -7,21 +7,21 @@ This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal
 
 (2) At the local machine, we need to install following:
 
-pip3 install ansible
+- pip3 install ansible
 
-pip3 install boto
+- pip3 install boto
 
-pip3 install boto3
+- pip3 install boto3
 
-pip3 install botocore
+- pip3 install botocore
 
-pip3 install awscli
+- pip3 install awscli
 
-pip3 install pyOpenSSL
+- pip3 install pyOpenSSL
 
-pip3 install pexpect
+- pip3 install pexpect
 
-pip3 install dnspython
+- pip3 install dnspython
 
 
 ## Prepare variables, and How to run the playbook .
@@ -44,6 +44,6 @@ pip3 install dnspython
 
 
 ## Reference
-(1) Course "Managing AWS with Ansible" from "A CLOUD GURU" .
+- Course "Managing AWS with Ansible" from "A CLOUD GURU" .
 
-(2) https://www.linuxtechi.com/install-docker-ce-centos-8-rhel-8/
+- https://www.linuxtechi.com/install-docker-ce-centos-8-rhel-8/
