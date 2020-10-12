@@ -2,7 +2,7 @@
 This is a test. This playbook intents to launch two CentOS on AWS EC2.  The goal is to install and configure Docker Swarm cluster.
 
 
-## Prerequisite for this Playbook
+## Prerequisites for the Playbook
 (1) These playbooks use Ansible version 2.9 (it is installed on the virtualenv)
 
 (2) At the local machine, we need to install following:
@@ -24,12 +24,18 @@ pip3 install pexpect
 pip3 install dnspython
 
 
-## Prepare variables and others
+## Prepare variables and others before run a playbook
+
+# At folder "1.provision-vm" 
+
 (1) We can change the size and location of VMs in this file at "variables/var.yml". 
 
 (2) The keys (ec2_access_key and ec2_secret_key) which are used to access Amazon AWS for the IAM user, are encrypted in "/variables/encrypt-iam-account.yml". So, we can change to be other IAM accounts.
 
 (3) This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it before run playbook.
+
+# At folder "2.config-nodes"
+
 
 ## How to run ?
 ansible-playbook playbook.yml --ask-vault-pass
