@@ -31,16 +31,19 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 ### At folder "1.provision-vm" 
 
 
-- "AWS Access Key" and "AWS Secret Key" are encrypted in "vars-encrypted-aws-keys.yml" .
+- In "vars-encrypted-aws-keys.yml" , prepares "AWS Access Key" and "AWS Secret Key" which are encrypted .
 
-- Some variable (key pair, vpc subnet id, group id) in "vars-others.yml" needs to be prepared in order to specify the location of the VM.
+- In "vars-others.yml", some variable (key pair, vpc subnet id, group id)  needs to be prepared in order to specify the location of the VM.
 
 - This playbook uses CentOS image from AWS Marketplace, so we have to subscribe it  ("CentOS 7" ,  By: ProComputers.com). 
+
+#### * (how to run)
 
 - Run by this command , "ansible-playbook playbook-provision-vm.yml --ask-vault-pass"
 
 ### At folder "2.config-nodes"
 
+-
 
 
 ## Reference
