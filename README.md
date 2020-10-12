@@ -58,3 +58,7 @@ Firstly, we will run the playbook in folder "1.provision-vm", then we will run t
 - Course "Managing AWS with Ansible" from "A CLOUD GURU" .
 
 - https://www.linuxtechi.com/install-docker-ce-centos-8-rhel-8/
+
+- https://medium.com/@Alibaba_Cloud/how-to-install-and-configure-docker-swarm-mode-on-centos-7-c0b32f0fbc82
+
+- https://github.com/drhelius/travis-ansible-demo
